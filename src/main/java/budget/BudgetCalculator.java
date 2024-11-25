@@ -1,89 +1,73 @@
 //Not directly using the budget base but using it as inspo & taking some of the code and altering it where appropriate
-
 package budget;
-
-import javax.print.attribute.standard.MediaSize.Other;
 
 //import swing 
 import javax.swing.*;
-import java.awt.event.*;
 import java.awt.*;
 
 //class created based on jswing
 public class BudgetCalculator extends JPanel {
-    JFrame topLevelFrame;  // top-level JFrame
-    GridBagConstraints layoutConstraints = new GridBagConstraints(); // used to control layout
+    private JButton calculateButton;
+    private JButton exitButton;
+    private JButton undoButtton;
+    private JTextField wagesField, loansField, cashBackField, billsField, rentField, foodShopField, totalIncomeField;
 
-    //widgets that we will use 
-    private JButton calculateButton;   // Calculate button
-    private JButton exitButton;        // Exit button
-    private JButton undoButtton;       // Undo button
-    private JTextField wagesField;     // Wages text field
-    private JTextField loansField;     // Loans text field
-    private JTextField cashBackField;       // Cash back text field
-    private JTextField billsField;    // Bills text field
-    private JTextField rentField;     // Rent text field
-    private JTextField foodShopField;  // Food Shop text field
-    private JTextField totalIncomeField; // Total Income field
-
-    //the constructor - creates th UI
-    public BudgetCalculator(JFrame frame) {
-        topLevelFrame = frame; // keep track of top-level frame
-        setLayout(new GridBagLayout());  // use GridBag layout
-        initComponents();  // initalise components
+    public BudgetCalculator() {
+        setLayout(new GridBagLayout());
+        initComponents();
     }
 
-    //method with initialises the components
-    private void initComponents(){
-
-        //Top row (0) - the Income Label
+    //widgets that we will use 
+    private void initComponents() {
+        //Income Label
         addLabelAndTextField("INCOME", null, 0, 0);
 
-        // Middle row (4) - The Expenses Label
-        addLabelAndTextField("EXPENSES", null, 4, 0);
-
-        //wages, loans and cashback
+        //wages, loans & cashback
         wagesField = addLabelAndTextField("Wages", "", 1, 0);
         loansField = addLabelAndTextField("Loans", "", 2, 0);
-        cashBackField = addLabelAndTextField("Cash Back", "TOOL_TIP_TEXT_KEY", 3, 0);
+        cashBackField = addLabelAndTextField("Cash Back", "", 3, 0);
 
-        //bills, rent, food 
-        billsField = addLabelAndTextField("Bills", "TOOL_TIP_TEXT_KEY", 5, 0);
-        rentField = addLabelAndTextField("Rent", "TOOL_TIP_TEXT_KEY", 6, 0);
-        foodShopField = addLabelAndTextField("Food Shop", "TOOL_TIP_TEXT_KEY", 7, 0);
+        //Expesnses Label
+        addLabelAndTextField("EXPENSES", null, 4, 0);
 
-        //Total Income 
+        //bills, rent & foodShop
+        billsField = addLabelAndTextField("Bills", "", 5, 0);
+        rentField = addLabelAndTextField("Rent", "", 6, 0);
+        foodShopField = addLabelAndTextField("Food Shop", "", 7, 0);
+        
+        //Total Income Label
         JLabel totalIncomeLabel = new JLabel("Total Income");
-         addComponent(totalIncomeLabel, 8, 0);
-        totalIncomeField = createTextField("0", false, 10); // Read-only
+        addComponent(totalIncomeLabel, 8, 0);
+        totalIncomeField = createTextField("0", false, 10);
         addComponent(totalIncomeField, 8, 1);
 
-        // Rows 9-11 - Buttons
+        //calculate button
         calculateButton = createButton("Calculate", e -> calculateTotalIncome());
         addComponent(calculateButton, 9, 0);
 
+        //undo button
         undoButtton = createButton("Undo", e -> undoLastAction());
         addComponent(undoButtton, 10, 0);
 
+        //exit button
         exitButton = createButton("Exit", e -> System.exit(0));
         addComponent(exitButton, 11, 0);
-
-        // set up  listeners (in a spearate method)
-        initListeners();
     }
 
+    //this method simplifies the initalising components and makes it less repetitive
     private JTextField addLabelAndTextField(String labelText, String initialText, int row, int col) {
         JLabel label = new JLabel(labelText);
         addComponent(label, row, col);
-    
-        if (initialText != null) { // If a text field is associated with the label
+
+        if (initialText != null) {
             JTextField textField = createTextField(initialText, true, 10);
             addComponent(textField, row, col + 1);
             return textField;
         }
-        return null; // No text field created
+        return null;
     }
 
+    //creates a text field
     private JTextField createTextField(String text, boolean editable, int columns) {
         JTextField textField = new JTextField(text, columns);
         textField.setHorizontalAlignment(JTextField.RIGHT);
@@ -91,68 +75,66 @@ public class BudgetCalculator extends JPanel {
         return textField;
     }
 
+    //creates a new button
     private JButton createButton(String text, java.awt.event.ActionListener action) {
         JButton button = new JButton(text);
         button.addActionListener(action);
         return button;
     }
 
-    // set up listeners
-    // initially just for buttons, can add listeners for text fields
-    private void initListeners() {
-
-        // exitButton - exit program when pressed
-        exitButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
-            }
-        });
-
-        // calculateButton - call calculateTotalIncome() when pressed
-        calculateButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-              //  calculateTotalIncome();
-            }
-        });
-
-    }
-
-    // add a component at specified row and column in UI.  (0,0) is top-left corner
+    //add a component at specified row and column in UI.  (0,0) is top-left corner
     private void addComponent(Component component, int gridrow, int gridcol) {
-        layoutConstraints.fill = GridBagConstraints.HORIZONTAL;   // always use horixontsl filll
-        layoutConstraints.gridx = gridcol;
-        layoutConstraints.gridy = gridrow;
-        add(component, layoutConstraints);
-
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.gridx = gridcol;
+        constraints.gridy = gridrow;
+        add(component, constraints);
     }
 
-      // standard mathod to show UI
-      private static void createAndShowGUI() {
- 
-        //Create and set up the window.
+    //calculates the total income based off the user input 
+    public double calculateTotalIncome() {
+        //gets the input from the user from the respective JTextField and assigns the number to the variable 
+        double wages = getTextFieldValue(wagesField);
+        double loans = getTextFieldValue(loansField);
+        double cashBack = getTextFieldValue(cashBackField);
+        double bills = getTextFieldValue(billsField);
+        double rent = getTextFieldValue(rentField);
+        double foodShop = getTextFieldValue(foodShopField);
+
+        double totalIncome = (wages + loans + cashBack) - (bills + rent + foodShop);
+        totalIncomeField.setText(String.format("%.2f", totalIncome));
+        return totalIncome;
+    }
+
+    private double getTextFieldValue(JTextField field) {
+        String fieldString = field.getText();
+        if (fieldString.isBlank()) {
+            return 0; // returns zero if the test field is blank
+        } else { // if text field is not blank, parse it into a double
+            try {
+                return Double.parseDouble(fieldString);
+            } catch (NumberFormatException ex) {// catch invalid number exception
+                JOptionPane.showMessageDialog(this, "Please enter a valid number");
+                return Double.NaN;// return NaN to show that field is not a number
+            }
+        }
+    }
+
+    //NEED TO CODE THE UNDO BUTTON 
+    private void undoLastAction() {
+        JOptionPane.showMessageDialog(this, "Undo functionality not implemented yet.");
+    }
+
+    public static void createAndShowGUI() {
         JFrame frame = new JFrame("Budget Calculator");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
- 
-        //Create and set up the content pane.
-        BudgetCalculator newContentPane = new BudgetCalculator(frame);
-        newContentPane.setOpaque(true); //content panes must be opaque
-        frame.setContentPane(newContentPane);
- 
-        //Display the window.
+        frame.setContentPane(new BudgetCalculator());
         frame.pack();
-        frame.setVisible(true);
+        frame.setVisible(true); //displays the window
     }
- 
-    // standard main class to set up Swing UI
-    public static void main(String[] args) {
-        //Schedule a job for the event-dispatching thread:
-        //creating and showing this application's GUI.
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                createAndShowGUI(); 
-            }
-        });
-    }
-    
 
+    //main calss to set up the SWING UI
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(BudgetCalculator::createAndShowGUI);
+    }
 }
