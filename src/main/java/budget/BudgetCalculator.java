@@ -7,10 +7,13 @@ import java.awt.*;
 
 //class created based on jswing
 public class BudgetCalculator extends JPanel {
+    //declares the instance variables
     private JButton calculateButton;
     private JButton exitButton;
     private JButton undoButtton;
     private JTextField wagesField, loansField, cashBackField, billsField, rentField, foodShopField, totalIncomeField;
+    private JComboBox<String> wagesTP, loansTP, cashBackTP, billsTP, rentTP, foodShopTP;
+
 
     public BudgetCalculator() {
         setLayout(new GridBagLayout());
@@ -24,17 +27,40 @@ public class BudgetCalculator extends JPanel {
 
         //wages, loans & cashback
         wagesField = addLabelAndTextField("Wages", "", 1, 0);
+        wagesTP = new JComboBox<>(new String[]{"Per Week", "Per Month", "Weekly to Monthly", "Per Year"});
+        addComponent(wagesTP, 1, 2); // Add to the right hand side of wages field
+        // Add ActionListener to the update calculations and do that to the other fields below 
+        wagesTP.addActionListener(e -> calculateTotalIncome());
+
         loansField = addLabelAndTextField("Loans", "", 2, 0);
+        loansTP = new JComboBox<>(new String[]{"Per Week", "Per Month", "Weekly to Monthly","Per Year"});
+        addComponent(loansTP, 2, 2);
+        loansTP.addActionListener(e -> calculateTotalIncome());
+
         cashBackField = addLabelAndTextField("Cash Back", "", 3, 0);
+        cashBackTP =  new JComboBox<>(new String[]{"Per Week", "Per Month", "Weekly to Monthly" , "Per Year"});
+        addComponent(cashBackTP, 3, 2);
+        cashBackTP.addActionListener(e -> calculateTotalIncome());
 
         //Expesnses Label
         addLabelAndTextField("EXPENSES", null, 4, 0);
 
         //bills, rent & foodShop
         billsField = addLabelAndTextField("Bills", "", 5, 0);
+        billsTP =  new JComboBox<>(new String[]{"Per Week", "Per Month", "Weekly to Monthly" , "Per Year"});
+        addComponent(billsTP, 5, 2);
+        billsTP.addActionListener(e -> calculateTotalIncome());
+
         rentField = addLabelAndTextField("Rent", "", 6, 0);
+        rentTP =  new JComboBox<>(new String[]{"Per Week", "Per Month", "Weekly to Monthly","Per Year"});
+        addComponent(rentTP, 6, 2);
+        rentTP.addActionListener(e -> calculateTotalIncome());
+
         foodShopField = addLabelAndTextField("Food Shop", "", 7, 0);
-        
+        foodShopTP =  new JComboBox<>(new String[]{"Per Week", "Per Month", "Weekly to Monthly" , "Per Year"});
+        addComponent(foodShopTP, 7, 2);
+        foodShopTP.addActionListener(e -> calculateTotalIncome());
+
         //Total Income Label
         JLabel totalIncomeLabel = new JLabel("Total Income");
         addComponent(totalIncomeLabel, 8, 0);
@@ -54,7 +80,7 @@ public class BudgetCalculator extends JPanel {
         addComponent(exitButton, 11, 0);
     }
 
-    //this method simplifies the initalising components and makes it less repetitive
+    //this method simplifies the init - initialising - components and makes it less repetitive
     private JTextField addLabelAndTextField(String labelText, String initialText, int row, int col) {
         JLabel label = new JLabel(labelText);
         addComponent(label, row, col);
@@ -94,17 +120,17 @@ public class BudgetCalculator extends JPanel {
     //calculates the total income based off the user input 
     public double calculateTotalIncome() {
         //gets the input from the user from the respective JTextField and assigns the number to the variable 
-        double wages = getTextFieldValue(wagesField);
-        double loans = getTextFieldValue(loansField);
-        double cashBack = getTextFieldValue(cashBackField);
-        double bills = getTextFieldValue(billsField);
-        double rent = getTextFieldValue(rentField);
-        double foodShop = getTextFieldValue(foodShopField);
+        double wages = timePeriod(getTextFieldValue(wagesField), wagesTP);
+        double loans = timePeriod(getTextFieldValue(loansField), loansTP);
+        double cashBack = timePeriod(getTextFieldValue(cashBackField), cashBackTP);
+        double bills = timePeriod(getTextFieldValue(billsField), billsTP);
+        double rent = timePeriod(getTextFieldValue(rentField), rentTP);
+        double foodShop = timePeriod(getTextFieldValue(foodShopField), foodShopTP);
 
         double totalIncome = (wages + loans + cashBack) - (bills + rent + foodShop);
         totalIncomeField.setText(String.format("%.2f", totalIncome));
 
-        //create the surplus / deficit
+        //create the surplus / deficit part
         totalIncomeField.setText(String.format("%.2f", totalIncome));
         //ref https://examples.javacodegeeks.com/java-development/desktop-java/swing/jlabel/set-foreground-color-in-jlabel/
         totalIncomeField.setForeground(totalIncome >= 0 ? Color.BLACK : Color.RED);
@@ -115,7 +141,7 @@ public class BudgetCalculator extends JPanel {
     private double getTextFieldValue(JTextField field) {
         String fieldString = field.getText();
         if (fieldString.isBlank()) {
-            return 0; // returns zero if the test field is blank
+            return 0; // returns zero if the test field is blank so the program still works
         } else { // if text field is not blank, parse it into a double
             try {
                 return Double.parseDouble(fieldString);
@@ -125,6 +151,21 @@ public class BudgetCalculator extends JPanel {
             }
         }
     }
+
+    private double timePeriod(double inputVal, JComboBox<String> timePeriodComboBox){
+        String tp = (String) timePeriodComboBox.getSelectedItem();
+        switch (tp) {
+            case "Per Week":
+                return inputVal * 52;
+            case "Per Month":
+                return inputVal * 12;
+            case "Weekly to Monthly":
+            return inputVal * 4.3333333 * 12;
+            default:
+                return inputVal; // Default is Per Year 
+        }
+    }
+        
 
     //NEED TO CODE THE UNDO BUTTON 
     private void undoLastAction() {
