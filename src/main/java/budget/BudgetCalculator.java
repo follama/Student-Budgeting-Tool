@@ -103,6 +103,12 @@ public class BudgetCalculator extends JPanel {
 
         double totalIncome = (wages + loans + cashBack) - (bills + rent + foodShop);
         totalIncomeField.setText(String.format("%.2f", totalIncome));
+
+        //create the surplus / deficit
+        totalIncomeField.setText(String.format("%.2f", totalIncome));
+        //ref https://examples.javacodegeeks.com/java-development/desktop-java/swing/jlabel/set-foreground-color-in-jlabel/
+        totalIncomeField.setForeground(totalIncome >= 0 ? Color.BLACK : Color.RED);
+
         return totalIncome;
     }
 
@@ -114,7 +120,7 @@ public class BudgetCalculator extends JPanel {
             try {
                 return Double.parseDouble(fieldString);
             } catch (NumberFormatException ex) {// catch invalid number exception
-                JOptionPane.showMessageDialog(this, "Please enter a valid number");
+                JOptionPane.showMessageDialog(this, "Invlid input, please enter a valid number");
                 return Double.NaN;// return NaN to show that field is not a number
             }
         }
