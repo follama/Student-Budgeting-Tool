@@ -6,6 +6,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.util.HashMap;
+import java.util.Map;
 
 //class created based on jswing
 public class BudgetCalculator extends JPanel {
@@ -15,8 +17,9 @@ public class BudgetCalculator extends JPanel {
     private JButton undoButtton;
     private JTextField wagesField, loansField, cashBackField, billsField, rentField, foodShopField, totalIncomeField;
     private JComboBox<String> wagesTP, loansTP, cashBackTP, billsTP, rentTP, foodShopTP;
+    private MultiLevelUndo stateManager = new MultiLevelUndo(); // creates an object of the multilevel undo class to access the methods
 
-
+    //constructor that initialises the componets/ makes them accessible throughout the class
     public BudgetCalculator() {
         setLayout(new GridBagLayout());
         initComponents();
@@ -32,33 +35,41 @@ public class BudgetCalculator extends JPanel {
         wagesTP = new JComboBox<>(new String[]{"Per Week", "Per Month", "Weekly to Monthly", "Per Year"}); //extension i) 
         addComponent(wagesTP, 1, 2); // Add to the right hand side of wages field
         // Add ActionListener to the update calculations and do that to the other fields below 
-        wagesTP.addActionListener(e -> calculateTotalIncome());
+        wagesTP.addActionListener(e -> {
+            saveCurrent();
+        });
         wagesField.addFocusListener(new FocusAdapter() {// exercise ii)
             @Override
             public void focusLost(FocusEvent e) {
-                calculateTotalIncome();
+                saveCurrent();
             }
         });
 
         loansField = addLabelAndTextField("Loans", "", 2, 0);
         loansTP = new JComboBox<>(new String[]{"Per Week", "Per Month", "Weekly to Monthly","Per Year"});
         addComponent(loansTP, 2, 2);
-        loansTP.addActionListener(e -> calculateTotalIncome());
+        loansTP.addActionListener(e -> {
+            saveCurrent();
+        });
         
         loansField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                calculateTotalIncome();}
+                saveCurrent();
+               }
             });
 
         cashBackField = addLabelAndTextField("Cash Back", "", 3, 0);
         cashBackTP =  new JComboBox<>(new String[]{"Per Week", "Per Month", "Weekly to Monthly" , "Per Year"});
         addComponent(cashBackTP, 3, 2);
-        cashBackTP.addActionListener(e -> calculateTotalIncome());
+        cashBackTP.addActionListener(e -> {
+            saveCurrent();
+        });
         cashBackField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                calculateTotalIncome();}
+                saveCurrent();
+                }
             });
 
         //Expesnses Label
@@ -68,33 +79,42 @@ public class BudgetCalculator extends JPanel {
         billsField = addLabelAndTextField("Bills", "", 5, 0);
         billsTP =  new JComboBox<>(new String[]{"Per Week", "Per Month", "Weekly to Monthly" , "Per Year"});
         addComponent(billsTP, 5, 2);
-        billsTP.addActionListener(e -> calculateTotalIncome());
+        billsTP.addActionListener(e -> {
+            saveCurrent();
+        });
         billsField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                calculateTotalIncome();}
+                saveCurrent();
+                }
             });
 
 
         rentField = addLabelAndTextField("Rent", "", 6, 0);
         rentTP =  new JComboBox<>(new String[]{"Per Week", "Per Month", "Weekly to Monthly","Per Year"});
         addComponent(rentTP, 6, 2);
-        rentTP.addActionListener(e -> calculateTotalIncome());
+        rentTP.addActionListener(e -> {
+            saveCurrent();
+        });
         rentField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                calculateTotalIncome();}
+                saveCurrent();
+                }
             });
 
 
         foodShopField = addLabelAndTextField("Food Shop", "", 7, 0);
         foodShopTP =  new JComboBox<>(new String[]{"Per Week", "Per Month", "Weekly to Monthly" , "Per Year"});
         addComponent(foodShopTP, 7, 2);
-        foodShopTP.addActionListener(e -> calculateTotalIncome());
+        foodShopTP.addActionListener(e -> {
+            saveCurrent();
+        });
         foodShopField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                calculateTotalIncome();}
+                saveCurrent();
+                }
             });
 
 
@@ -108,13 +128,16 @@ public class BudgetCalculator extends JPanel {
         calculateButton = createButton("Calculate", e -> calculateTotalIncome());
         addComponent(calculateButton, 9, 0);
 
-        //undo button
-        undoButtton = createButton("Undo", e -> undoLastAction());
+        //undo buttons
+        undoButtton = createButton("Multilevel Undo", e -> undoLastAction());
         addComponent(undoButtton, 10, 0);
+
+        JButton undoButtton2 = createButton("Single Level Undo", e -> singleLevelUndo());
+        addComponent(undoButtton2, 11, 0);
 
         //exit button
         exitButton = createButton("Exit", e -> System.exit(0));
-        addComponent(exitButton, 11, 0);
+        addComponent(exitButton, 12, 0);
     }
 
     //this method simplifies the init - initialising - components and makes it less repetitive
@@ -151,6 +174,7 @@ public class BudgetCalculator extends JPanel {
         constraints.fill = GridBagConstraints.HORIZONTAL;
         constraints.gridx = gridcol;
         constraints.gridy = gridrow;
+        constraints.insets = new Insets(3, 5, 3, 5); //paddinggg
         add(component, constraints);
     }
 
@@ -170,7 +194,7 @@ public class BudgetCalculator extends JPanel {
         //create the surplus / deficit part
         totalIncomeField.setText(String.format("%.2f", totalIncome));
         //ref https://examples.javacodegeeks.com/java-development/desktop-java/swing/jlabel/set-foreground-color-in-jlabel/
-        totalIncomeField.setForeground(totalIncome >= 0 ? Color.BLACK : Color.RED);
+        totalIncomeField.setForeground(totalIncome >= 0 ? Color.BLACK : Color.RED); //can also use an if else statement but this is just faster
 
         return totalIncome;
     }
@@ -189,15 +213,16 @@ public class BudgetCalculator extends JPanel {
         }
     }
 
+    //based on the case that the user picks in the combo box, this methods turns it into a string and executes the calculation based on the choice of the user
     private double timePeriod(double inputVal, JComboBox<String> timePeriodComboBox){
-        String tp = (String) timePeriodComboBox.getSelectedItem();
-        switch (tp) {
+        String tp = (String) timePeriodComboBox.getSelectedItem(); 
+        switch (tp) { 
             case "Per Week":
                 return inputVal * 52;
             case "Per Month":
                 return inputVal * 12;
             case "Weekly to Monthly":
-            return inputVal * 4.3333333 * 12;
+            return inputVal * 4.3333333;
             default:
                 return inputVal; // Default is Per Year 
         }
@@ -211,13 +236,74 @@ public class BudgetCalculator extends JPanel {
             }
         });
     }
-    
+
+    //gets from the MultiLevelUndo class and saves the state of all the filds
+    private void saveCurrent() {
+        Map<String, Object> currentState = new HashMap<>();
+        currentState.put("Wages", wagesField.getText());
+        currentState.put("WagesTP", wagesTP.getSelectedItem());
+        currentState.put("Loans", loansField.getText());
+        currentState.put("LoansTP", loansTP.getSelectedItem());
+        currentState.put("CashBack", cashBackField.getText());
+        currentState.put("CashBackTP", cashBackTP.getSelectedItem());
+        currentState.put("Bills", billsField.getText());
+        currentState.put("BillsTP", billsTP.getSelectedItem());
+        currentState.put("Rent", rentField.getText());
+        currentState.put("RentTP", rentTP.getSelectedItem());
+        currentState.put("FoodShop", foodShopField.getText());
+        currentState.put("FoodShopTP", foodShopTP.getSelectedItem());
         
-    //NEED TO CODE THE UNDO BUTTON 
-    private void undoLastAction() {
-        JOptionPane.showMessageDialog(this, "Undo functionality not implemented yet.");
+        //checks if the state of te stack is different and if it is then save the current state
+        if (stateManager.isStateDifferent(currentState)){
+            stateManager.saveCurrent(currentState);
+        }
+
+        calculateTotalIncome(); //this automaticall updates the totals put inside the saveCurrent method as it saves lines of code and improve readability 
     }
 
+    //restore state to previous value
+    private void restoreState(Map<String, Object> state) {
+        try {
+            wagesField.setText((String) state.get("Wages"));
+            wagesTP.setSelectedItem(state.get("WagesTP"));
+            loansField.setText((String) state.get("Loans"));
+            loansTP.setSelectedItem(state.get("LoansTP"));
+            cashBackField.setText((String) state.get("CashBack"));
+            cashBackTP.setSelectedItem(state.get("CashBackTP"));
+            billsField.setText((String) state.get("Bills"));
+            billsTP.setSelectedItem(state.get("BillsTP"));
+            rentField.setText((String) state.get("Rent"));
+            rentTP.setSelectedItem(state.get("RentTP"));
+            foodShopField.setText((String) state.get("FoodShop"));
+            foodShopTP.setSelectedItem(state.get("FoodShopTP"));
+            calculateTotalIncome(); // Update total income
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error restoring state: " + e.getMessage());
+        }
+    }
+    
+    //undoes the previous action - mulitilevel
+    private void undoLastAction() {
+        Map<String, Object> lastState = stateManager.undoLastState(); // gets the last state
+        if (lastState == null) {
+            JOptionPane.showMessageDialog(this, "There is nothing to undo");
+            return;
+        }
+
+        // Restore state to previous state 
+        restoreState(lastState);
+    }
+
+    //undoes the previous action - singlelevel
+    private void singleLevelUndo() {
+        Map<String, Object> lastState2 = stateManager.peekLastState();
+        if (lastState2 == null) {
+            JOptionPane.showMessageDialog(this, "There is nothing to undo");
+            return;
+        }
+        restoreState(lastState2); // Restore state
+    }
+    
     public static void createAndShowGUI() {
         JFrame frame = new JFrame("Budget Calculator");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
