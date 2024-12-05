@@ -4,6 +4,8 @@ package budget;
 //import swing 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 
 //class created based on jswing
 public class BudgetCalculator extends JPanel {
@@ -27,20 +29,37 @@ public class BudgetCalculator extends JPanel {
 
         //wages, loans & cashback
         wagesField = addLabelAndTextField("Wages", "", 1, 0);
-        wagesTP = new JComboBox<>(new String[]{"Per Week", "Per Month", "Weekly to Monthly", "Per Year"});
+        wagesTP = new JComboBox<>(new String[]{"Per Week", "Per Month", "Weekly to Monthly", "Per Year"}); //extension i) 
         addComponent(wagesTP, 1, 2); // Add to the right hand side of wages field
         // Add ActionListener to the update calculations and do that to the other fields below 
         wagesTP.addActionListener(e -> calculateTotalIncome());
+        wagesField.addFocusListener(new FocusAdapter() {// exercise ii)
+            @Override
+            public void focusLost(FocusEvent e) {
+                calculateTotalIncome();
+            }
+        });
 
         loansField = addLabelAndTextField("Loans", "", 2, 0);
         loansTP = new JComboBox<>(new String[]{"Per Week", "Per Month", "Weekly to Monthly","Per Year"});
         addComponent(loansTP, 2, 2);
         loansTP.addActionListener(e -> calculateTotalIncome());
+        
+        loansField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                calculateTotalIncome();}
+            });
 
         cashBackField = addLabelAndTextField("Cash Back", "", 3, 0);
         cashBackTP =  new JComboBox<>(new String[]{"Per Week", "Per Month", "Weekly to Monthly" , "Per Year"});
         addComponent(cashBackTP, 3, 2);
         cashBackTP.addActionListener(e -> calculateTotalIncome());
+        cashBackField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                calculateTotalIncome();}
+            });
 
         //Expesnses Label
         addLabelAndTextField("EXPENSES", null, 4, 0);
@@ -50,16 +69,34 @@ public class BudgetCalculator extends JPanel {
         billsTP =  new JComboBox<>(new String[]{"Per Week", "Per Month", "Weekly to Monthly" , "Per Year"});
         addComponent(billsTP, 5, 2);
         billsTP.addActionListener(e -> calculateTotalIncome());
+        billsField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                calculateTotalIncome();}
+            });
+
 
         rentField = addLabelAndTextField("Rent", "", 6, 0);
         rentTP =  new JComboBox<>(new String[]{"Per Week", "Per Month", "Weekly to Monthly","Per Year"});
         addComponent(rentTP, 6, 2);
         rentTP.addActionListener(e -> calculateTotalIncome());
+        rentField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                calculateTotalIncome();}
+            });
+
 
         foodShopField = addLabelAndTextField("Food Shop", "", 7, 0);
         foodShopTP =  new JComboBox<>(new String[]{"Per Week", "Per Month", "Weekly to Monthly" , "Per Year"});
         addComponent(foodShopTP, 7, 2);
         foodShopTP.addActionListener(e -> calculateTotalIncome());
+        foodShopField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                calculateTotalIncome();}
+            });
+
 
         //Total Income Label
         JLabel totalIncomeLabel = new JLabel("Total Income");
@@ -165,8 +202,17 @@ public class BudgetCalculator extends JPanel {
                 return inputVal; // Default is Per Year 
         }
     }
-        
 
+    private void addFocusListenerToField(JTextField field) {
+        field.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                calculateTotalIncome();
+            }
+        });
+    }
+    
+        
     //NEED TO CODE THE UNDO BUTTON 
     private void undoLastAction() {
         JOptionPane.showMessageDialog(this, "Undo functionality not implemented yet.");
