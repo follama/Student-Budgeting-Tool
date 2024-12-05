@@ -34,7 +34,7 @@ The two classes I coded in were the BudgetCalculator class (The main class where
   
 
 ## JUnit Test
-The tests make sure that both undo buttons and calculations do what they are required. The BC.Test is where I created more tests for the computer to see if it would do what I expected with some example data. This includes testing if the computer would make the winning move in a row, column or diagonally and same for if itwould block a Human's winning move that way.
+The tests make sure that both undo buttons and calculations do what they are required. The BCTest.java is where I created more tests for the computer to see if it would do what I expected with some example data. This includes testing if the computer would make the winning move in a row, column or diagonally and same for if itwould block a Human's winning move that way.
 
 ## Road Map i.e plan to improve for next time
 Improvements for next time:

@@ -14,10 +14,12 @@ public class BudgetCalculator extends JPanel {
     //declares the instance variables
     private JButton calculateButton;
     private JButton exitButton;
-    private JButton undoButtton;
+    private JButton undoButton;
     private JTextField wagesField, loansField, cashBackField, billsField, rentField, foodShopField, totalIncomeField;
     private JComboBox<String> wagesTP, loansTP, cashBackTP, billsTP, rentTP, foodShopTP;
     private MultiLevelUndo stateManager = new MultiLevelUndo(); // creates an object of the multilevel undo class to access the methods
+    private boolean isRestoringState = false;
+
 
     //constructor that initialises the componets/ makes them accessible throughout the class
     public BudgetCalculator() {
@@ -36,12 +38,12 @@ public class BudgetCalculator extends JPanel {
         addComponent(wagesTP, 1, 2); // Add to the right hand side of wages field
         // Add ActionListener to the update calculations and do that to the other fields below 
         wagesTP.addActionListener(e -> {
-            saveCurrent();
+            if (!isRestoringState) saveCurrent();
         });
         wagesField.addFocusListener(new FocusAdapter() {// exercise ii)
             @Override
             public void focusLost(FocusEvent e) {
-                saveCurrent();
+                if (!isRestoringState) saveCurrent();
             }
         });
 
@@ -49,13 +51,13 @@ public class BudgetCalculator extends JPanel {
         loansTP = new JComboBox<>(new String[]{"Per Week", "Per Month", "Weekly to Monthly","Per Year"});
         addComponent(loansTP, 2, 2);
         loansTP.addActionListener(e -> {
-            saveCurrent();
+            if (!isRestoringState)  saveCurrent();
         });
         
         loansField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                saveCurrent();
+                if (!isRestoringState)  saveCurrent();
                }
             });
 
@@ -63,12 +65,12 @@ public class BudgetCalculator extends JPanel {
         cashBackTP =  new JComboBox<>(new String[]{"Per Week", "Per Month", "Weekly to Monthly" , "Per Year"});
         addComponent(cashBackTP, 3, 2);
         cashBackTP.addActionListener(e -> {
-            saveCurrent();
+            if (!isRestoringState) saveCurrent();
         });
         cashBackField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                saveCurrent();
+                if (!isRestoringState)  saveCurrent();
                 }
             });
 
@@ -80,12 +82,12 @@ public class BudgetCalculator extends JPanel {
         billsTP =  new JComboBox<>(new String[]{"Per Week", "Per Month", "Weekly to Monthly" , "Per Year"});
         addComponent(billsTP, 5, 2);
         billsTP.addActionListener(e -> {
-            saveCurrent();
+            if (!isRestoringState) saveCurrent();
         });
         billsField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                saveCurrent();
+                if (!isRestoringState) saveCurrent();
                 }
             });
 
@@ -94,12 +96,12 @@ public class BudgetCalculator extends JPanel {
         rentTP =  new JComboBox<>(new String[]{"Per Week", "Per Month", "Weekly to Monthly","Per Year"});
         addComponent(rentTP, 6, 2);
         rentTP.addActionListener(e -> {
-            saveCurrent();
+            if (!isRestoringState) saveCurrent();
         });
         rentField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                saveCurrent();
+                if (!isRestoringState) saveCurrent();
                 }
             });
 
@@ -108,12 +110,12 @@ public class BudgetCalculator extends JPanel {
         foodShopTP =  new JComboBox<>(new String[]{"Per Week", "Per Month", "Weekly to Monthly" , "Per Year"});
         addComponent(foodShopTP, 7, 2);
         foodShopTP.addActionListener(e -> {
-            saveCurrent();
+            if (!isRestoringState)  saveCurrent();
         });
         foodShopField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                saveCurrent();
+                if (!isRestoringState) saveCurrent();
                 }
             });
 
@@ -129,11 +131,11 @@ public class BudgetCalculator extends JPanel {
         addComponent(calculateButton, 9, 0);
 
         //undo buttons
-        undoButtton = createButton("Multilevel Undo", e -> undoLastAction());
-        addComponent(undoButtton, 10, 0);
+        undoButton = createButton("Multilevel Undo", e -> undoLastAction());
+        addComponent(undoButton, 10, 0);
 
-        JButton undoButtton2 = createButton("Single Level Undo", e -> singleLevelUndo());
-        addComponent(undoButtton2, 11, 0);
+        JButton undoButton2 = createButton("Single Level Undo", e -> singleLevelUndo());
+        addComponent(undoButton2, 11, 0);
 
         //exit button
         exitButton = createButton("Exit", e -> System.exit(0));
@@ -221,7 +223,7 @@ public class BudgetCalculator extends JPanel {
                 return inputVal * 52;
             case "Per Month":
                 return inputVal * 12;
-            case "Weekly to Monthly":
+            case "Weekly to Monthly Equivalent":
             return inputVal * 4.3333333;
             default:
                 return inputVal; // Default is Per Year 
@@ -263,6 +265,7 @@ public class BudgetCalculator extends JPanel {
 
     //restore state to previous value
     private void restoreState(Map<String, Object> state) {
+        isRestoringState = true; // this disables the listeners
         try {
             wagesField.setText((String) state.get("Wages"));
             wagesTP.setSelectedItem(state.get("WagesTP"));
@@ -277,8 +280,10 @@ public class BudgetCalculator extends JPanel {
             foodShopField.setText((String) state.get("FoodShop"));
             foodShopTP.setSelectedItem(state.get("FoodShopTP"));
             calculateTotalIncome(); // Update total income
-        } catch (Exception e) {
+        } catch (Exception e) { //if there's an error show this message 
             JOptionPane.showMessageDialog(this, "Error restoring state: " + e.getMessage());
+        } finally {
+            isRestoringState = false; // Re-enable listeners
         }
     }
     
